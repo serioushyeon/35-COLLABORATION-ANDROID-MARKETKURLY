@@ -42,7 +42,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_17 //윈도우에서 hilt 사용 시 java 1.8은 에러가 발생하는 이슈가 있다고함 -> 17 사용 시 해결
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true

@@ -19,8 +19,9 @@ import com.example.market_kurly.feature.goods.viewmodel.GoodsViewModel
 import com.example.market_kurly.feature.review.ReviewViewModel
 import com.example.market_kurly.feature.wishlist.WishListViewModel
 import com.example.market_kurly.feature.home.HomeViewModel
+import javax.inject.Inject
 
-class BaseViewModelFactory(
+class BaseViewModelFactory @Inject constructor(
     private val exampleRepository: ExampleRepository? = null,
     private val goodsRepository: GoodsRepository? = null,
     private val likeRepository: LikeRepository? = null,
