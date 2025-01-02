@@ -1,8 +1,9 @@
 package com.example.market_kurly
 
 import android.app.Application
+import dagger.hilt.android.HiltAndroidApp
 import timber.log.Timber
-
+@HiltAndroidApp
 class MarketKurlyApplication : Application() {
     override fun onCreate() {
         super.onCreate()

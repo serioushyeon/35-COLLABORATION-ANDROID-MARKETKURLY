@@ -16,8 +16,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import javax.inject.Inject
 
-class ReviewViewModel(
+class ReviewViewModel @Inject constructor (
     private val reviewRepository: ReviewRepository,
     private val goodsRepository: GoodsRepository
 ) : ViewModel() {

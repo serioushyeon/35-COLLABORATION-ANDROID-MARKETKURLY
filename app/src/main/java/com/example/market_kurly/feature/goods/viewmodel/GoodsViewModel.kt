@@ -21,8 +21,9 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class GoodsViewModel(
+class GoodsViewModel @Inject constructor(
     private val goodsRepository: GoodsRepository,
     private val likeRepository: LikeRepository,
 ) : ViewModel() {

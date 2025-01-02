@@ -10,8 +10,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class WishListViewModel(
+class WishListViewModel @Inject constructor (
     private val wishListRepository: WishListRepository
 ) : ViewModel() {
     private val _wishListItems = MutableStateFlow<List<WishListUiData>>(emptyList())
