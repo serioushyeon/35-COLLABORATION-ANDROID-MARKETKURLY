@@ -34,7 +34,6 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -48,10 +47,11 @@ import com.example.market_kurly.core.util.KeyStorage.MEMBERSHIP_EXPAND
 import com.example.market_kurly.core.util.KeyStorage.REVIEW
 import com.example.market_kurly.core.util.KeyStorage.WISHLIST
 import com.example.market_kurly.core.util.price.toDecimalFormat
+import com.example.market_kurly.core.util.viewmodelfactory.hiltViewModelWithFactory
 import com.example.market_kurly.feature.goods.component.KurlyAlsoViewedColumnItem
 import com.example.market_kurly.feature.goods.component.KurlyGoodsInfoText
 import com.example.market_kurly.feature.goods.component.KurlyGoodsMembershipToggleButton
-import com.example.market_kurly.feature.goods.state.GoodsState
+import com.example.market_kurly.feature.goods.contract.GoodsContract
 import com.example.market_kurly.feature.goods.viewmodel.GoodsViewModel
 import com.example.market_kurly.ui.theme.Gray2
 import com.example.market_kurly.ui.theme.Gray4
@@ -61,42 +61,53 @@ import com.example.market_kurly.ui.theme.MarketKurlyTheme.typography
 import com.example.market_kurly.ui.theme.PrimaryColor400
 import com.example.market_kurly.ui.theme.Red
 import com.example.market_kurly.ui.theme.White
-import kotlinx.coroutines.launch
 
 @Composable
 fun GoodsScreen(
     navController: NavHostController,
-    productId: Int,
+    productId: Int
 ) {
     val context = LocalContext.current
-
-    val viewModel: GoodsViewModel = viewModel(factory = BaseViewModelFactory())
-
+    val factory = BaseViewModelFactory()
+    val viewModel: GoodsViewModel = hiltViewModelWithFactory(factory)
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     val snackbarHostState = remember { SnackbarHostState() }
 
     val memberId = 1
 
-    LaunchedEffect(true) {
-        viewModel.getGoodsDetailData(productId, memberId)
-    }
     LaunchedEffect(Unit) {
-        launch {
-            viewModel.snackbarMessage.collect { message ->
-                val result = snackbarHostState.showSnackbar(
-                    message = context.getString(message),
-                    actionLabel = context.getString(R.string.goods_snackbar_action_go_to_wishlist),
-                    duration = SnackbarDuration.Short,
-                )
-                if (result == SnackbarResult.ActionPerformed) {
-                    viewModel.navigateToWishlist()
+        viewModel.sendEvent(
+            GoodsContract.GoodsUiEvent.LoadGoodsDetail(
+                memberId,
+                productId
+            )
+        )
+        viewModel.effect.collect { effect ->
+            when (effect) {
+                is GoodsContract.GoodsUiEffect.ShowSnackBar -> {
+                    val result = snackbarHostState.showSnackbar(
+                        message = context.getString(effect.message),
+                        actionLabel = context.getString(R.string.goods_snackbar_action_go_to_wishlist),
+                        duration = SnackbarDuration.Short,
+                    )
+                    if (result == SnackbarResult.ActionPerformed) {
+                        viewModel.sendEvent(GoodsContract.GoodsUiEvent.NavigateToWishlist)
+                    }
                 }
-            }
-        }
-        launch {
-            viewModel.navigateToWishlist.collect {
-                navController.navigate(WISHLIST)
+
+                GoodsContract.GoodsUiEffect.NavigateToWishlist -> navController.navigate(WISHLIST)
+                GoodsContract.GoodsUiEffect.NavigateToGoodsDetail -> navController.navigate(GOODS) {
+                    popUpTo(GOODS) { inclusive = true }
+                    launchSingleTop = true
+                }
+                GoodsContract.GoodsUiEffect.NavigateToReview -> navController.navigate(
+                    "review/${productId}"
+                ) {
+                    popUpTo(REVIEW) { inclusive = true }
+                    launchSingleTop = true
+                }
+                GoodsContract.GoodsUiEffect.NavigateUp -> navController.navigateUp()
             }
         }
     }
@@ -111,16 +122,10 @@ fun GoodsScreen(
                     navController.navigateUp()
                 },
                 navigateToGoodsDetail = {
-                    navController.navigate(GOODS) {
-                        popUpTo(GOODS) { inclusive = true }
-                        launchSingleTop = true
-                    }
+                    viewModel.sendEvent(GoodsContract.GoodsUiEvent.NavigateToGoodsDetail)
                 },
                 navigateGoodsReview = {
-                    navController.navigate("review/${productId}") {
-                        popUpTo(REVIEW) { inclusive = true }
-                        launchSingleTop = true
-                    }
+                    viewModel.sendEvent(GoodsContract.GoodsUiEvent.NavigateToReview)
                 },
             )
         },
@@ -128,7 +133,14 @@ fun GoodsScreen(
             KurlyGoodsDetailBottomBar(
                 modifier = Modifier.background(White),
                 isFavorite = uiState.isFavorite,
-                onFavoriteClick = { viewModel.toggleFavorite(productId, memberId) },
+                onFavoriteClick = {
+                    viewModel.sendEvent(
+                        GoodsContract.GoodsUiEvent.OnFavoriteButtonPressed(
+                            productId = productId,
+                            memberId = memberId
+                        )
+                    )
+                },
             )
         },
     ) { innerPadding ->
@@ -177,7 +189,7 @@ fun GoodsScreen(
 }
 
 @Composable
-fun GoodsOverViewSection(uiState: GoodsState) {
+fun GoodsOverViewSection(uiState: GoodsContract.GoodsUiState) {
     val context = LocalContext.current
     AsyncImage(
         model = ImageRequest.Builder(context)
@@ -310,7 +322,7 @@ fun GoodsOverViewSection(uiState: GoodsState) {
 }
 
 @Composable
-fun AlsoViewedGoodsSection(uiState: GoodsState) {
+fun AlsoViewedGoodsSection(uiState: GoodsContract.GoodsUiState) {
     Column(
         modifier = Modifier
             .background(White)

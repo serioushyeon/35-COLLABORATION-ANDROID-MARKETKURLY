@@ -1,9 +1,8 @@
 package com.example.market_kurly.feature.goods.viewmodel
 
-import androidx.annotation.StringRes
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.market_kurly.R
+import com.example.market_kurly.core.base.BaseViewModel
 import com.example.market_kurly.domain.model.GoodsInfoData
 import com.example.market_kurly.core.util.KeyStorage.ALLERGY
 import com.example.market_kurly.core.util.KeyStorage.BRIX
@@ -14,37 +13,40 @@ import com.example.market_kurly.core.util.KeyStorage.SELLING_UNIT
 import com.example.market_kurly.core.util.KeyStorage.WEIGHT
 import com.example.market_kurly.domain.repository.GoodsRepository
 import com.example.market_kurly.domain.repository.LikeRepository
-import com.example.market_kurly.feature.goods.state.GoodsState
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import com.example.market_kurly.feature.goods.contract.GoodsContract.GoodsUiEffect
+import com.example.market_kurly.feature.goods.contract.GoodsContract.GoodsUiEvent
+import com.example.market_kurly.feature.goods.contract.GoodsContract.GoodsUiState
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@HiltViewModel
 class GoodsViewModel @Inject constructor(
     private val goodsRepository: GoodsRepository,
     private val likeRepository: LikeRepository,
-) : ViewModel() {
+)  : BaseViewModel<GoodsUiState, GoodsUiEvent, GoodsUiEffect>(GoodsUiState()) {
+    override fun reduceState(event: GoodsUiEvent) {
+        when (event) {
+            is GoodsUiEvent.LoadGoodsDetail -> getGoodsDetailData(
+                memberId = event.memberId,
+                productId = event.productId
+            )
+            is GoodsUiEvent.OnFavoriteButtonPressed -> toggleFavorite(
+                memberId = event.memberId,
+                productId = event.productId
+            )
+            GoodsUiEvent.NavigateToWishlist -> postEffect(GoodsUiEffect.NavigateToWishlist)
+            GoodsUiEvent.NavigateToGoodsDetail -> postEffect(GoodsUiEffect.NavigateToGoodsDetail)
+            GoodsUiEvent.NavigateToReview -> postEffect(GoodsUiEffect.NavigateToReview)
+            GoodsUiEvent.NavigateUp -> postEffect(GoodsUiEffect.NavigateUp)
+        }
+    }
 
-    @StringRes
-    private val _snackbarMessage = MutableSharedFlow<Int>()
-
-    @StringRes
-    val snackbarMessage: SharedFlow<Int> = _snackbarMessage
-
-    private val _navigateToWishlist = MutableSharedFlow<Unit>()
-    val navigateToWishlist: SharedFlow<Unit> = _navigateToWishlist
-
-    private var _uiState = MutableStateFlow(GoodsState())
-    val uiState = _uiState.asStateFlow()
-
-    fun getGoodsDetailData(productId: Int, memberId: Int) {
+    private fun getGoodsDetailData(productId: Int, memberId: Int) {
         viewModelScope.launch {
             goodsRepository.getGoodsDetailById(productId, memberId)
                 .onSuccess { goodsData ->
-                    _uiState.update { currentState ->
+                    updateState(
                         currentState.copy(
                             isSuccess = true,
                             alsoViewedList = goodsRepository.getDummyAlsoViewedList(),
@@ -52,16 +54,15 @@ class GoodsViewModel @Inject constructor(
                             goodsInfoList = createInfoPairs(goodsData?.infoData),
                             isFavorite = goodsData?.isInterest ?: false,
                         )
-                    }
+                    )
                 }
                 .onFailure {
-                    _uiState.update { currentState ->
+                    updateState(
                         currentState.copy(
                             isSuccess = false,
                             alsoViewedList = goodsRepository.getDummyAlsoViewedList(),
                         )
-                    }
-
+                    )
                 }
         }
     }
@@ -81,32 +82,25 @@ class GoodsViewModel @Inject constructor(
         return emptyList()
     }
 
-    fun toggleFavorite(productId: Int, memberId: Int) {
+    private fun toggleFavorite(productId: Int, memberId: Int) {
         viewModelScope.launch {
-            _uiState.update { currentState ->
-                currentState.copy(isFavorite = !_uiState.value.isFavorite)
-            }
-            if (_uiState.value.isFavorite) {
+            updateState(
+                currentState.copy(isFavorite = !currentState.isFavorite)
+            )
+            if (currentState.isFavorite) {
                 likeRepository.postProductsLike(productId, memberId)
                     .onSuccess {
-                            _snackbarMessage.emit(R.string.goods_snackbar_message_favorite)
+                        postEffect(GoodsUiEffect.ShowSnackBar(R.string.goods_snackbar_message_favorite))
                     }
                     .onFailure {
-                            _snackbarMessage.emit(R.string.goods_snackbar_message_fail)
+                        postEffect(GoodsUiEffect.ShowSnackBar(R.string.goods_snackbar_message_fail))
                     }
-            }
-            else{
+            } else {
                 likeRepository.deleteProductsLike(productId, memberId)
                     .onFailure {
-                        _snackbarMessage.emit(R.string.goods_snackbar_message_fail)
+                        postEffect(GoodsUiEffect.ShowSnackBar(R.string.goods_snackbar_message_fail))
                     }
             }
-        }
-    }
-
-    fun navigateToWishlist() {
-        viewModelScope.launch {
-            _navigateToWishlist.emit(Unit)
         }
     }
 }
