@@ -1,6 +1,5 @@
 package com.example.market_kurly.feature.home
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.market_kurly.domain.repository.ProductsRepository
