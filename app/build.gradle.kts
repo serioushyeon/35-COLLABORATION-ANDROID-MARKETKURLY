@@ -48,6 +48,9 @@ android {
         compose = true
         buildConfig = true
     }
+    hilt {
+        enableAggregatingTask = false //java.lang.String com.squareup.javapoet.ClassName.canonicalName 메서드 관련 에러 해결
+    }
 }
 
 dependencies {
