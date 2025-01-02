@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.market_kurly.core.util.KeyStorage.WISHLIST_CATEGORY_TOTAL
 import com.example.market_kurly.domain.model.WishListUiData
 import com.example.market_kurly.domain.repository.WishListRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -12,6 +13,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@HiltViewModel
 class WishListViewModel @Inject constructor (
     private val wishListRepository: WishListRepository
 ) : ViewModel() {

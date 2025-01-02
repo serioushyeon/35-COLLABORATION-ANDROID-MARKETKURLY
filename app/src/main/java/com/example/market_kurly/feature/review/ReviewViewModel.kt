@@ -8,6 +8,7 @@ import com.example.market_kurly.domain.model.ReviewUiData
 import com.example.market_kurly.domain.repository.GoodsRepository
 import com.example.market_kurly.domain.repository.ReviewRepository
 import com.example.market_kurly.feature.review.state.ReviewState
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -18,6 +19,7 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
+@HiltViewModel
 class ReviewViewModel @Inject constructor (
     private val reviewRepository: ReviewRepository,
     private val goodsRepository: GoodsRepository

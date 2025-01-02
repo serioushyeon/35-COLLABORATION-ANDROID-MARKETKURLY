@@ -28,11 +28,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.market_kurly.R
-import com.example.market_kurly.core.base.BaseViewModelFactory
 import com.example.market_kurly.core.util.modifier.noRippleClickable
 import com.example.market_kurly.feature.home.component.AsyncImageFillWidth
 import com.example.market_kurly.feature.home.component.HomeBannerRow
@@ -55,7 +54,7 @@ import com.example.market_kurly.ui.theme.White
 fun HomeScreen(
     navController: NavHostController
 ) {
-    val viewModel: HomeViewModel = viewModel(factory = BaseViewModelFactory())
+    val viewModel: HomeViewModel = hiltViewModel()
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 

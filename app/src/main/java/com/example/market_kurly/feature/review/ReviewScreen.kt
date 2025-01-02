@@ -26,11 +26,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.market_kurly.R
-import com.example.market_kurly.core.base.BaseViewModelFactory
 import com.example.market_kurly.core.designsystem.component.KurlyGoodsDetailBottomBar
 import com.example.market_kurly.core.designsystem.component.KurlyGoodsDetailTopBar
 import com.example.market_kurly.core.util.KeyStorage.GOODS
@@ -54,7 +53,7 @@ fun ReviewScreen(
     productId: Int,
     modifier: Modifier = Modifier,
 ) {
-    val viewModel: ReviewViewModel = viewModel(factory = BaseViewModelFactory())
+    val viewModel: ReviewViewModel = hiltViewModel()
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }

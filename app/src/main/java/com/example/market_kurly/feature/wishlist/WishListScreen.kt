@@ -18,11 +18,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.market_kurly.core.base.BaseViewModelFactory
 import com.example.market_kurly.core.util.KeyStorage.WISHLIST_CATEGORY_DAIRY_PRODUCT
 import com.example.market_kurly.core.util.KeyStorage.WISHLIST_CATEGORY_FRUIT_NUTS_RICE
 import com.example.market_kurly.core.util.KeyStorage.WISHLIST_CATEGORY_SIMPLE_PRODUCT
@@ -39,7 +38,7 @@ fun WishListScreen(
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
-    val viewModel: WishListViewModel = viewModel(factory = BaseViewModelFactory())
+    val viewModel: WishListViewModel = hiltViewModel()
     val wishList by viewModel.wishListItems.collectAsStateWithLifecycle()
 
     var selectedCategory by remember { mutableStateOf(WISHLIST_CATEGORY_TOTAL) }

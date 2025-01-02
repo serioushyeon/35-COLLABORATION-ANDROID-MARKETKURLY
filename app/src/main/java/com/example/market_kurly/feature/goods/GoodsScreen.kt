@@ -33,12 +33,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.market_kurly.R
-import com.example.market_kurly.core.base.BaseViewModelFactory
 import com.example.market_kurly.core.designsystem.component.KurlyGoodsDetailBottomBar
 import com.example.market_kurly.core.designsystem.component.KurlyGoodsDetailTopBar
 import com.example.market_kurly.core.util.KeyStorage.EMPTY_RESPONSE
@@ -47,7 +47,6 @@ import com.example.market_kurly.core.util.KeyStorage.MEMBERSHIP_EXPAND
 import com.example.market_kurly.core.util.KeyStorage.REVIEW
 import com.example.market_kurly.core.util.KeyStorage.WISHLIST
 import com.example.market_kurly.core.util.price.toDecimalFormat
-import com.example.market_kurly.core.util.viewmodelfactory.hiltViewModelWithFactory
 import com.example.market_kurly.feature.goods.component.KurlyAlsoViewedColumnItem
 import com.example.market_kurly.feature.goods.component.KurlyGoodsInfoText
 import com.example.market_kurly.feature.goods.component.KurlyGoodsMembershipToggleButton
@@ -68,8 +67,7 @@ fun GoodsScreen(
     productId: Int
 ) {
     val context = LocalContext.current
-    val factory = BaseViewModelFactory()
-    val viewModel: GoodsViewModel = hiltViewModelWithFactory(factory)
+    val viewModel: GoodsViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     val snackbarHostState = remember { SnackbarHostState() }
